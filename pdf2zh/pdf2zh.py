@@ -338,11 +338,15 @@ def main(args: Optional[List[str]] = None) -> int:
     if parsed_args.kernel == "experimental":
         # TODO: Implement the next kernel using native calling instead of a cli wrapper.
         
-        # first detect if `pdf2zh.kernel.experimental` is properly installed
-        if not shutil.which("pdf2zh.kernel.experimental"):
-            raise ValueError("pdf2zh.kernel.experimental is not installed. Please install it using `pip install pdf2zh.kernel.experimental`.")
-        # then call the pdf2zh.kernel.experimental cli
-        subprocess.run(["pdf2zh.kernel.experimental", parsed_args.files[0]], check=True)
+        # First detect if `pdf2zh_next` is properly installed
+        if not shutil.which("pdf2zh_next"):
+            raise ValueError("Experimental kernel is not installed. \n Please ensure that the pdf2zh_next submodule is properly initialized. \nIf the error persists, please try not to use the experimental kernel.")
+        # Before calling the cli, remove the key of parsed_args.kernel from the parsed_args
+        kernel_args = vars(parsed_args)
+        del kernel_args["kernel"]
+        # Then call the pdf2zh.kernel.experimental cli
+        # TODO: Add mapping for the kernel arguments.
+        subprocess.run(["pdf2zh_next", kernel_args["files"][0]], check=True)
         return 0
 
     translate(model=ModelInstance.value, **vars(parsed_args))
