@@ -1238,8 +1238,6 @@ class LiteLLMTranslator(BaseTranslator):
         think_filter_regex = r"^<think>.+?\n*(</think>|\n)*(</think>)\n*"
         self.add_cache_impact_parameters("think_filter_regex", think_filter_regex)
         self.think_filter_regex = re.compile(think_filter_regex, flags=re.DOTALL)
-        stream_val = self.envs.get("LITELLM_STREAM", "true").lower()
-        self.stream = stream_val == "true"
 
     @retry(
         retry=retry_if_exception_type(_litellm_RateLimitError),
@@ -1254,19 +1252,16 @@ class LiteLLMTranslator(BaseTranslator):
         completion_kwargs = {
             "model": self.model,
             "messages": self.prompt(text, self.prompttext),
-            "stream": self.stream,
+            "stream": True,
             "drop_params": True,
             **self.options,
         }
         response = _litellm.completion(**completion_kwargs)
-        if self.stream:
-            collected = []
-            for chunk in response:
-                if chunk.choices and chunk.choices[0].delta.content:
-                    collected.append(chunk.choices[0].delta.content)
-            content = "".join(collected).strip()
-        else:
-            content = response.choices[0].message.content.strip()
+        collected = []
+        for chunk in response:
+            if chunk.choices and chunk.choices[0].delta.content:
+                collected.append(chunk.choices[0].delta.content)
+        content = "".join(collected).strip()
         content = self.think_filter_regex.sub("", content).strip()
         return content
 
