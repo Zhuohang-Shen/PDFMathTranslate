@@ -1211,7 +1211,6 @@ class LiteLLMTranslator(BaseTranslator):
     name = "litellm"
     envs = {
         "LITELLM_MODEL": "gpt-4o-mini",
-        "LITELLM_API_KEY": None,
     }
     CustomPrompt = True
 
@@ -1259,10 +1258,6 @@ class LiteLLMTranslator(BaseTranslator):
             "drop_params": True,
             **self.options,
         }
-        api_key = self.envs.get("LITELLM_API_KEY")
-        if api_key:
-            completion_kwargs["api_key"] = api_key
-
         response = _litellm.completion(**completion_kwargs)
         if self.stream:
             collected = []
